@@ -1,3 +1,5 @@
+-- Coin Collector + Tabs (FINAL COMPLETE VERSION)
+
 local player = game.Players.LocalPlayer
 local players = game:GetService("Players")
 
