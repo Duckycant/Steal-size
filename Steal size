@@ -1,0 +1,374 @@
+local player = game.Players.LocalPlayer
+local players = game:GetService("Players")
+
+local char = player.Character or player.CharacterAdded:Wait()
+local hrp = char:WaitForChild("HumanoidRootPart")
+
+player.CharacterAdded:Connect(function(c)
+char = c
+hrp = c:WaitForChild("HumanoidRootPart")
+end)
+
+---------------------------------------------------
+-- GUI
+---------------------------------------------------
+
+local gui = Instance.new("ScreenGui")
+gui.Parent = player.PlayerGui
+gui.ResetOnSpawn = false
+
+local frame = Instance.new("Frame", gui)
+frame.Size = UDim2.new(0,260,0,500)
+frame.Position = UDim2.new(0.5,-130,0.5,-250)
+frame.BackgroundColor3 = Color3.fromRGB(35,35,35)
+frame.Active = true
+frame.Draggable = true
+
+-- TITLE
+local title = Instance.new("TextLabel", frame)
+title.Size = UDim2.new(1,0,0,30)
+title.BackgroundColor3 = Color3.fromRGB(25,25,25)
+title.Text = "Ducky Hub"
+title.TextColor3 = Color3.new(1,1,1)
+title.TextScaled = true
+
+-- ❌ CLOSE BUTTON
+local closeBtn = Instance.new("TextButton", frame)
+closeBtn.Size = UDim2.new(0,30,0,30)
+closeBtn.Position = UDim2.new(1,-30,0,0)
+closeBtn.Text = "X"
+closeBtn.BackgroundColor3 = Color3.fromRGB(200,0,0)
+closeBtn.TextColor3 = Color3.new(1,1,1)
+closeBtn.TextScaled = true
+
+closeBtn.MouseButton1Click:Connect(function()
+frame.Visible = false
+end)
+
+---------------------------------------------------
+-- TAB BUTTONS
+---------------------------------------------------
+
+local mainTabBtn = Instance.new("TextButton", frame)
+mainTabBtn.Size = UDim2.new(0.33,0,0,25)
+mainTabBtn.Position = UDim2.new(0,0,0,30)
+mainTabBtn.Text = "Main"
+
+local playerTabBtn = Instance.new("TextButton", frame)
+playerTabBtn.Size = UDim2.new(0.33,0,0,25)
+playerTabBtn.Position = UDim2.new(0.33,0,0,30)
+playerTabBtn.Text = "Player"
+
+local worldTabBtn = Instance.new("TextButton", frame)
+worldTabBtn.Size = UDim2.new(0.34,0,0,25)
+worldTabBtn.Position = UDim2.new(0.66,0,0,30)
+worldTabBtn.Text = "World"
+
+---------------------------------------------------
+-- TAB COLOR SYSTEM
+---------------------------------------------------
+
+local function updateTabColors(active)
+local inactive = Color3.fromRGB(80,80,80)
+local activeColor = Color3.fromRGB(120,120,120)
+
+mainTabBtn.BackgroundColor3 = inactive
+playerTabBtn.BackgroundColor3 = inactive
+worldTabBtn.BackgroundColor3 = inactive
+
+active.BackgroundColor3 = activeColor
+end
+
+---------------------------------------------------
+-- TABS
+---------------------------------------------------
+
+local mainTab = Instance.new("Frame", frame)
+mainTab.Size = UDim2.new(1,0,1,-55)
+mainTab.Position = UDim2.new(0,0,0,55)
+mainTab.BackgroundTransparency = 1
+
+local playerTab = Instance.new("Frame", frame)
+playerTab.Size = mainTab.Size
+playerTab.Position = mainTab.Position
+playerTab.BackgroundTransparency = 1
+playerTab.Visible = false
+
+local worldTab = Instance.new("Frame", frame)
+worldTab.Size = mainTab.Size
+worldTab.Position = mainTab.Position
+worldTab.BackgroundTransparency = 1
+worldTab.Visible = false
+
+---------------------------------------------------
+-- TAB SWITCH
+---------------------------------------------------
+
+mainTabBtn.MouseButton1Click:Connect(function()
+mainTab.Visible = true
+playerTab.Visible = false
+worldTab.Visible = false
+updateTabColors(mainTabBtn)
+end)
+
+playerTabBtn.MouseButton1Click:Connect(function()
+mainTab.Visible = false
+playerTab.Visible = true
+worldTab.Visible = false
+updateTabColors(playerTabBtn)
+end)
+
+worldTabBtn.MouseButton1Click:Connect(function()
+mainTab.Visible = false
+playerTab.Visible = false
+worldTab.Visible = true
+updateTabColors(worldTabBtn)
+end)
+
+updateTabColors(mainTabBtn)
+
+---------------------------------------------------
+-- FUNCTIONS
+---------------------------------------------------
+
+local function collect(folderName)
+local folder = workspace:FindFirstChild(folderName)
+if folder then
+for _, v in ipairs(folder:GetDescendants()) do
+if v:IsA("BasePart") then
+hrp.CFrame = v.CFrame + Vector3.new(0,2,0)
+task.wait(0.15)
+end
+end
+end
+end
+
+local function tpBestCoin()
+hrp.CFrame = CFrame.new(-2300.43701,1.8554287,124.852791)
+end
+
+local function voidMany()
+local positions = {
+CFrame.new(-2105,34,-1375),
+CFrame.new(-2080,47,-541),
+CFrame.new(-2105,33,-1384),
+CFrame.new(-2376,46,-741),
+CFrame.new(-2270,47,-1049)
+}
+
+for _, pos in ipairs(positions) do
+hrp.CFrame = pos
+task.wait(2)
+end
+end
+
+-- REMOTES
+local rs = game:GetService("ReplicatedStorage")
+local remotes = rs:WaitForChild("Remotes")
+
+local function convert()
+remotes:WaitForChild("ConvertRequest"):FireServer()
+end
+
+local function upgrade(name)
+remotes:WaitForChild("UpgradeBuyTokens"):FireServer(name)
+end
+
+local function rebirth()
+remotes:WaitForChild("RebirthEvent"):FireServer()
+end
+
+---------------------------------------------------
+-- PLAYER SEARCH
+---------------------------------------------------
+
+local function getPlayerByName(name)
+for _, p in ipairs(players:GetPlayers()) do
+if string.lower(p.Name):find(string.lower(name)) then
+return p
+end
+end
+return nil
+end
+
+---------------------------------------------------
+-- BUTTON MAKERS
+---------------------------------------------------
+
+local function makeButton(parent, text, posY, color, callback)
+local btn = Instance.new("TextButton", parent)
+btn.Size = UDim2.new(0,200,0,35)
+btn.Position = UDim2.new(0.5,-100,0,posY)
+btn.Text = text
+btn.BackgroundColor3 = color
+btn.TextColor3 = Color3.new(1,1,1)
+btn.TextScaled = true
+btn.MouseButton1Click:Connect(callback)
+end
+
+local function makeToggleButton(parent, text, posY, delay, callback)
+local btn = Instance.new("TextButton", parent)
+btn.Size = UDim2.new(0,200,0,35)
+btn.Position = UDim2.new(0.5,-100,0,posY)
+btn.Text = text .. " [OFF]"
+btn.BackgroundColor3 = Color3.fromRGB(80,80,80)
+btn.TextColor3 = Color3.new(1,1,1)
+btn.TextScaled = true
+
+local toggled = false
+
+btn.MouseButton1Click:Connect(function()
+toggled = not toggled
+
+if toggled then
+btn.BackgroundColor3 = Color3.fromRGB(0,200,0)
+btn.Text = text .. " [ON]"
+
+task.spawn(function()
+while toggled do
+callback()
+task.wait(delay)
+end
+end)
+else
+btn.BackgroundColor3 = Color3.fromRGB(80,80,80)
+btn.Text = text .. " [OFF]"
+end
+end)
+end
+
+---------------------------------------------------
+-- MAIN TAB
+---------------------------------------------------
+
+-- ✅ UPDATED RED COIN → AUTO VIP COIN
+local AutoVIPCoin = false
+
+makeToggleButton(mainTab,"Auto VIP Coin",10,0,function()
+AutoVIPCoin = not AutoVIPCoin
+end)
+
+task.spawn(function()
+while true do
+if AutoVIPCoin then
+pcall(function()
+local char = player.Character or player.CharacterAdded:Wait()
+local root = char:WaitForChild("HumanoidRootPart")
+
+local folder = workspace:WaitForChild("RedCoins")
+local targets = {}
+
+for _, v in ipairs(folder:GetChildren()) do
+local union = v:FindFirstChild("Union")
+if union then
+table.insert(targets, union)
+end
+end
+
+if #targets > 0 then
+root.CFrame = targets[math.random(1, #targets)].CFrame
+end
+end)
+end
+task.wait(0.5)
+end
+end)
+
+makeButton(mainTab,"Gambling Coin50/50",50,Color3.fromRGB(0,255,0),function()
+tpBestCoin()
+end)
+
+makeButton(mainTab,"tower Coins",90,Color3.fromRGB(140,0,255),function()
+hrp.CFrame = CFrame.new(-245,190,712)
+end)
+
+makeButton(mainTab,"Void coins Farm",130,Color3.fromRGB(100,100,255),function()
+voidMany()
+end)
+
+---------------------------------------------------
+-- PLAYER TAB
+---------------------------------------------------
+
+makeToggleButton(playerTab,"Auto Convert",10,0.2,function()
+convert()
+end)
+
+makeToggleButton(playerTab,"Auto SPEED",50,0.05,function()
+upgrade("MaxSpeed")
+end)
+
+makeToggleButton(playerTab,"Auto DAMAGE",90,0.05,function()
+upgrade("Damage")
+end)
+
+makeToggleButton(playerTab,"Auto HEALTH",130,0.05,function()
+upgrade("Health")
+end)
+
+makeToggleButton(playerTab,"Auto GAIN",170,0.05,function()
+upgrade("Gain")
+end)
+
+makeToggleButton(playerTab,"Auto REBIRTH",210,0.3,function()
+rebirth()
+end)
+
+-- Speed / Jump inputs
+local speedBox = Instance.new("TextBox", playerTab)
+speedBox.Size = UDim2.new(0,95,0,30)
+speedBox.Position = UDim2.new(0.1,0,0,255)
+speedBox.Text = "50"
+speedBox.BackgroundColor3 = Color3.fromRGB(50,50,50)
+speedBox.TextColor3 = Color3.new(1,1,1)
+speedBox.TextScaled = true
+
+local jumpBox = Instance.new("TextBox", playerTab)
+jumpBox.Size = UDim2.new(0,95,0,30)
+jumpBox.Position = UDim2.new(0.53,0,0,255)
+jumpBox.Text = "100"
+jumpBox.BackgroundColor3 = Color3.fromRGB(50,50,50)
+jumpBox.TextColor3 = Color3.new(1,1,1)
+jumpBox.TextScaled = true
+
+makeToggleButton(playerTab,"Auto SPEED/JUMP",295,0.2,function()
+local hum = char and char:FindFirstChildOfClass("Humanoid")
+if hum then
+local s = tonumber(speedBox.Text)
+local j = tonumber(jumpBox.Text)
+if s then hum.WalkSpeed = s end
+if j then hum.JumpPower = j end
+end
+end)
+
+-- Player TP
+local nameBox = Instance.new("TextBox", playerTab)
+nameBox.Size = UDim2.new(0,200,0,30)
+nameBox.Position = UDim2.new(0.5,-100,0,340)
+nameBox.PlaceholderText = "Enter player name..."
+nameBox.BackgroundColor3 = Color3.fromRGB(50,50,50)
+nameBox.TextColor3 = Color3.new(1,1,1)
+nameBox.TextScaled = true
+
+makeToggleButton(playerTab,"TP TO PLAYER",380,0.2,function()
+local target = getPlayerByName(nameBox.Text)
+if target and target.Character and target.Character:FindFirstChild("HumanoidRootPart") then
+hrp.CFrame = target.Character.HumanoidRootPart.CFrame + Vector3.new(0,3,0)
+end
+end)
+
+---------------------------------------------------
+-- WORLD TAB
+---------------------------------------------------
+
+makeButton(worldTab,"Farm void Coins",10,Color3.fromRGB(0,255,100),function()
+hrp.CFrame = CFrame.new(-2113,38,-1372)
+end)
+
+makeButton(worldTab,"Island 2",50,Color3.fromRGB(0,150,255),function()
+hrp.CFrame = CFrame.new(-2147,66,-753)
+end)
+
+makeButton(worldTab,"Starter",90,Color3.fromRGB(255,200,0),function()
+hrp.CFrame = CFrame.new(-66,65,161)
+end)
